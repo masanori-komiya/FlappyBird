@@ -196,6 +196,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             
             //スプライトに物理演算を設定する
             under.physicsBody = SKPhysicsBody(rectangleOf: wallTexture.size())
+            under.physicsBody?.categoryBitMask = self.wallCategory
                 
             //衝突の時に動かないように設定する
             under.physicsBody?.isDynamic = false
@@ -208,6 +209,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             
             //スプライトに物理演算を設定する
             upper.physicsBody = SKPhysicsBody(rectangleOf: wallTexture.size())
+            upper.physicsBody?.categoryBitMask = self.wallCategory
             
             //衝突の時に動かないように設定する
             upper.physicsBody?.isDynamic = false
@@ -265,12 +267,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         bird.physicsBody?.categoryBitMask = birdCategory
         bird.physicsBody?.collisionBitMask = groundCategory | wallCategory
         bird.physicsBody?.contactTestBitMask = groundCategory | wallCategory
-        
-        // スプライトを作成
-        bird = SKSpriteNode(texture: birdTextureA)
-        bird.position = CGPoint(x: self.frame.size.width * 0.2, y:self.frame.size.height * 0.7)
-        
-
         // アニメーションを設定
         bird.run(flap)
 
@@ -294,6 +290,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             var bestScore = userDefaults.integer(forKey: "BEST")
             if score > bestScore {
                 bestScore = score
+                bestScoreLabelNode.text = "Best Score:\(bestScore)"
                 userDefaults.set(bestScore, forKey: "BEST")
                 userDefaults.synchronize()
             }
