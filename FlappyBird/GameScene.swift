@@ -21,6 +21,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let wallCategory: UInt32 = 1 << 2       // 0...00100
     let scoreCategory: UInt32 = 1 << 3      // 0...01000
     let itemCategory: UInt32 = 1 << 4       // 0...10000
+    
     //スコア用
     var score = 0
     var scoreLabelNode:SKLabelNode!
@@ -272,7 +273,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         //衝突カテゴリー設定
         bird.physicsBody?.categoryBitMask = birdCategory
         bird.physicsBody?.collisionBitMask = groundCategory | wallCategory
-        bird.physicsBody?.contactTestBitMask = groundCategory | wallCategory
+        bird.physicsBody?.contactTestBitMask = groundCategory | wallCategory | itemCategory
+        
         // アニメーションを設定
         bird.run(flap)
 
@@ -305,14 +307,21 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             item.zPosition = -50 //雲より手前、地面より奥
             
             let itemA = SKSpriteNode(texture: itemTextureA)
-            itemA.position = CGPoint(x: 50, y: 50)
+            itemA.position = CGPoint(x: 400, y: 400)
+            itemA.size = CGSize(width: itemA.size.width * 0.3, height: itemA.size.height * 0.3)
+            
+            item.addChild(itemA)
             
             //スプライトに物理演算を設定する
-            item.physicsBody = SKPhysicsBody(rectangleOf: itemTextureA.size())
-            item.physicsBody?.categoryBitMask = self.itemCategory
+            itemA.physicsBody = SKPhysicsBody(rectangleOf: itemTextureA.size())
+            itemA.physicsBody?.categoryBitMask = self.itemCategory
                 
             //衝突の時に動かないように設定する
-            item.physicsBody?.isDynamic = false
+            itemA.physicsBody?.isDynamic = false
+            
+            //スコアアップ
+            itemA.physicsBody?.categoryBitMask = self.itemCategory
+            itemA.physicsBody?.contactTestBitMask = self.birdCategory
             
             self.itemNode.addChild(item)
             item.run(ItemAnimation)
@@ -343,6 +352,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 userDefaults.set(bestScore, forKey: "BEST")
                 userDefaults.synchronize()
             }
+        } else if((contact.bodyA.categoryBitMask & itemCategory) == itemCategory ||  (contact.bodyB.categoryBitMask & itemCategory) == itemCategory){
+            itemA.removeFromParent()
+            print("ItemScoreUp")
         } else {
             // 壁か地面と衝突した
             print("GameOver")
@@ -366,7 +378,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         bird.position = CGPoint(x: self.frame.size.width * 0.2, y:self.frame.size.height * 0.7)
         bird.physicsBody?.velocity = CGVector.zero
-        bird.physicsBody?.collisionBitMask = groundCategory | wallCategory
+        bird.physicsBody?.collisionBitMask = groundCategory | wallCategory | itemCategory
         bird.zRotation = 0
 
         wallNode.removeAllChildren()
